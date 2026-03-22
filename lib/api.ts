@@ -17,7 +17,17 @@ api.interceptors.request.use((config) => {
 
 // Global response interceptor for error handling
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // If it's a GenericResponse from our API, unwrap the data field
+        if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+            return {
+                ...response,
+                data: response.data.data,
+                fullResponse: response.data // Keep metadata like message/success just in case
+            };
+        }
+        return response;
+    },
     (error) => {
         if (error.response?.status === 401) {
             if (typeof window !== 'undefined') {

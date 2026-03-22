@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 
 interface InstructorQuizCardProps {
     quiz: Quiz;
-    onDelete?: (id: number) => void;
-    onTogglePublish?: (id: number, published: boolean) => void;
+    onDelete?: (id: string) => void;
+    onTogglePublish?: (id: string, published: boolean) => void;
 }
 
 export function InstructorQuizCard({ quiz, onDelete, onTogglePublish }: InstructorQuizCardProps) {
@@ -58,13 +58,13 @@ export function InstructorQuizCard({ quiz, onDelete, onTogglePublish }: Instruct
                         <Users className="h-4 w-4 mr-2 text-slate-500" />
                         <span>Submissions</span>
                     </div>
-                    <div className="text-sm font-bold text-white text-right">--</div>
+                    <div className="text-sm font-bold text-white text-right">{quiz.submission_count || 0}</div>
 
                     <div className="flex items-center text-sm text-slate-400">
                         <BarChart3 className="h-4 w-4 mr-2 text-slate-500" />
                         <span>Avg. Score</span>
                     </div>
-                    <div className="text-sm font-bold text-white text-right">--%</div>
+                    <div className="text-sm font-bold text-white text-right">{(quiz.average_score || 0).toFixed(1)}%</div>
                 </div>
             </CardContent>
 

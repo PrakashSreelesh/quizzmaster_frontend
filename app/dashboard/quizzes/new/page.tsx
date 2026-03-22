@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Plus, ChevronRight, Loader2, BookOpen, Clock, FileText } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { ImportModal } from "@/components/instructor/ImportModal";
 
 export default function NewQuizPage() {
     const router = useRouter();
@@ -17,6 +18,8 @@ export default function NewQuizPage() {
     const [timeLimit, setTimeLimit] = useState<number | "">("");
     const [isLoading, setIsLoading] = useState(false);
     const { error: toastError } = useToast();
+
+    const [showImportModal, setShowImportModal] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,10 +42,27 @@ export default function NewQuizPage() {
         <div className="max-w-3xl mx-auto px-4 py-10">
             <Breadcrumbs items={[{ label: "Dashboard", href: "/dashboard" }, { label: "New Quiz" }]} />
 
-            <div className="mb-10">
-                <h1 className="text-4xl font-bold text-white mb-2">Create New <span className="gradient-text">Quiz</span></h1>
-                <p className="text-slate-400">Set up the foundations of your quiz. You can add questions in the next step.</p>
+            <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
+                    <h1 className="text-4xl font-bold text-white mb-2">Create New <span className="gradient-text">Quiz</span></h1>
+                    <p className="text-slate-400">Set up the foundations of your quiz. You can add questions in the next step.</p>
+                </div>
+                <Button
+                    variant="outline"
+                    onClick={() => setShowImportModal(true)}
+                    className="border-violet-500/30 text-violet-400 hover:bg-violet-500/10 h-11"
+                >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Import from Excel
+                </Button>
             </div>
+
+            {showImportModal && (
+                <ImportModal
+                    onClose={() => setShowImportModal(false)}
+                    onComplete={(quizId: string) => router.push(`/dashboard/quizzes/${quizId}/edit`)}
+                />
+            )}
 
             <Card className="border-white/5 bg-slate-900/40">
                 <form onSubmit={handleSubmit}>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Quiz } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Clock, BookOpen, User, Play } from "lucide-react";
@@ -32,9 +33,20 @@ export function QuizCard({ quiz }: QuizCardProps) {
             </CardHeader>
 
             <CardContent className="flex-grow">
-                <div className="flex items-center text-sm text-slate-400">
-                    <User className="h-4 w-4 mr-2 text-slate-500" />
-                    <span>{quiz.instructor_name || "Guest Instructor"}</span>
+                <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center text-slate-400">
+                        <User className="h-4 w-4 mr-2 text-slate-500" />
+                        <span>{quiz.instructor_name || "Guest Instructor"}</span>
+                    </div>
+                    {quiz.user_attempts !== undefined && (
+                        <div className="text-[11px] font-medium text-slate-500">
+                            Attempts: <span className={cn(
+                                quiz.user_attempts >= quiz.max_attempts ? "text-red-400" : "text-violet-400"
+                            )}>
+                                {quiz.user_attempts}/{quiz.max_attempts}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </CardContent>
 

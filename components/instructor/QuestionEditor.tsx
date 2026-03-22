@@ -25,9 +25,7 @@ export function QuestionEditor({ question, onSave, onCancel, isSaving }: Questio
     const { error: toastError } = useToast();
 
     const handleAddOption = () => {
-        if (type === 'short_answer') {
-            setOptions([...options, { text: "" }]);
-        } else {
+        if (type === 'multiple_choice') {
             const newId = String.fromCharCode(97 + options.length).toLowerCase();
             setOptions([...options, { id: newId, text: "", is_correct: false }]);
         }
@@ -44,6 +42,7 @@ export function QuestionEditor({ question, onSave, onCancel, isSaving }: Questio
     };
 
     const toggleOptionCorrect = (index: number) => {
+        if (type === 'short_answer') return;
         const newOptions = options.map((opt, i) => {
             if (type === 'multiple_choice' || type === 'true_false') {
                 return { ...opt, is_correct: i === index };
@@ -137,7 +136,15 @@ export function QuestionEditor({ question, onSave, onCancel, isSaving }: Questio
                                 />
                                 <TypeButton
                                     active={type === 'short_answer'}
-                                    onClick={() => setType('short_answer')}
+                                    onClick={() => {
+                                        setType('short_answer');
+                                        if (options.length === 0 || options[0].id) {
+                                            setOptions([{ text: '', is_correct: true }]);
+                                        } else {
+                                            // Ensure only one option exists for short answer
+                                            setOptions([{ ...options[0], is_correct: true }]);
+                                        }
+                                    }}
                                     icon={<Type className="h-3.5 w-3.5" />}
                                     label="Short"
                                 />
@@ -159,16 +166,14 @@ export function QuestionEditor({ question, onSave, onCancel, isSaving }: Questio
                 </div>
 
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                            {type === 'short_answer' ? "Accepted Answers" : "Options"}
-                        </label>
-                        {type !== 'true_false' && (
-                            <Button type="button" variant="ghost" size="sm" onClick={handleAddOption} className="h-7 text-[10px] text-violet-400 hover:text-violet-300">
-                                <Plus className="h-3 w-3 mr-1" /> Add Option
-                            </Button>
-                        )}
-                    </div>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                        {type === 'short_answer' ? "Correct Answer" : "Options"}
+                    </label>
+                    {type === 'multiple_choice' && (
+                        <Button type="button" variant="ghost" size="sm" onClick={handleAddOption} className="h-7 text-[10px] text-violet-400 hover:text-violet-300">
+                            <Plus className="h-3 w-3 mr-1" /> Add Option
+                        </Button>
+                    )}
 
                     <div className="space-y-3">
                         {options.map((option, index) => (
@@ -188,7 +193,7 @@ export function QuestionEditor({ question, onSave, onCancel, isSaving }: Questio
 
                                 <div className="flex-grow flex items-center bg-slate-950/30 border border-white/5 rounded-lg overflow-hidden transition-all focus-within:border-violet-500/50 focus-within:bg-slate-950/60">
                                     <span className="bg-slate-800/50 px-3 py-2 text-[10px] font-bold text-slate-500 uppercase border-r border-white/5">
-                                        {type === 'short_answer' ? (index + 1) : option.id}
+                                        {type === 'short_answer' ? "Ans" : option.id}
                                     </span>
                                     <input
                                         className="flex-grow bg-transparent px-3 py-2 text-sm text-white focus:outline-none"
@@ -199,7 +204,7 @@ export function QuestionEditor({ question, onSave, onCancel, isSaving }: Questio
                                     />
                                 </div>
 
-                                {type !== 'true_false' && options.length > 1 && (
+                                {type === 'multiple_choice' && options.length > 2 && (
                                     <Button
                                         variant="ghost"
                                         size="icon"

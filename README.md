@@ -7,6 +7,7 @@ The frontend of QuizzMaster is a modern, responsive web application built with *
 - **Components**: Custom UI primitives (Button, Input, Card) with glassmorphic effects.
 - **Animations**: Framer Motion for page transitions and micro-interactions.
 - **State**: React Context for Auth and Toast notifications.
+- **Features**: Real-time attempt tracking, stable quiz timers, and question randomization support.
 
 ## 🏗 Directory Structure
 - `app/`: Next.js App Router pages and layouts.

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/Button";
@@ -18,6 +19,7 @@ export default function RegisterPage() {
     const [role, setRole] = useState<'instructor' | 'student' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
+    const router = useRouter();
     const { success: toastSuccess, error: toastError } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -31,26 +33,18 @@ export default function RegisterPage() {
 
         try {
             // Register
-            await api.post("/auth/register", {
+            const res = await api.post("/auth/register", {
                 email,
                 username,
                 password,
                 role,
             });
+            const { user_id, email: registeredEmail } = res.data; // Extract user_id and email
 
-            // Login immediately
-            const formData = new URLSearchParams();
-            formData.append("username", username);
-            formData.append("password", password);
-
-            const response = await api.post("/auth/login", formData, {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            });
-
-            toastSuccess("Registration successful! Welcome aboard.");
-            await login(response.data.access_token);
+            toastSuccess(`Welcome! Please verify your email ${registeredEmail}`);
+            router.push(`/auth/verify?user_id=${user_id}`); // Redirect to verify page
         } catch (err: any) {
-            const errorMsg = err.response?.data?.detail || "Registration failed. Try again.";
+            const errorMsg = err.response?.data?.detail || "Registration failed. Please try again.";
             toastError(errorMsg);
         } finally {
             setIsLoading(false);

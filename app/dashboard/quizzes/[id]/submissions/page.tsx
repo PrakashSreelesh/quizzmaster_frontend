@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Users, FileText, Calendar, CheckCircle2, ChevronRight, Search, Download } from "lucide-react";
+import { Pagination } from "@/components/ui/Pagination";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { Input } from "@/components/ui/Input";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/Input";
 
 export default function InstructorQuizSubmissionsPage() {
     const { id } = useParams();
@@ -20,33 +22,50 @@ export default function InstructorQuizSubmissionsPage() {
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+            setPage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            const [subRes, quizRes] = await Promise.all([
+                api.get(`/submissions/quiz/${id}`, {
+                    params: { search: debouncedSearch || undefined, page, size: 20 }
+                }),
+                api.get(`/quizzes/${id}`)
+            ]);
+
+            // Interceptor unwraps data
+            const { items, meta } = subRes.data;
+            setSubmissions(items);
+            setTotalPages(meta.pages);
+            setQuiz(quizRes.data);
+        } catch (err: any) {
+            console.error("Failed to fetch submissions", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [subRes, quizRes] = await Promise.all([
-                    api.get(`/submissions/quiz/${id}`),
-                    api.get(`/quizzes/${id}`)
-                ]);
-                setSubmissions(subRes.data);
-                setQuiz(quizRes.data);
-            } catch (err: any) {
-                console.error("Failed to fetch submissions", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         fetchData();
-    }, [id]);
+    }, [id, debouncedSearch, page]);
 
-    const filteredSubmissions = submissions.filter(s =>
-        s.student_name?.toLowerCase().includes(search.toLowerCase())
-    );
-
-    if (isLoading) {
+    if (isLoading && !quiz) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)]">
-                <Spinner className="h-12 w-12 mb-4" />
+            <div className="max-w-7xl mx-auto px-4 py-10">
+                <Skeleton className="h-10 w-64 mb-10" />
+                <Skeleton className="h-96 w-full rounded-2xl" />
             </div>
         );
     }
@@ -70,7 +89,7 @@ export default function InstructorQuizSubmissionsPage() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                         <Input
                             placeholder="Search student..."
-                            className="pl-10 h-10"
+                            className="pl-10 h-10 bg-slate-900/40 border-white/5"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -94,8 +113,14 @@ export default function InstructorQuizSubmissionsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                            {filteredSubmissions.length > 0 ? (
-                                filteredSubmissions.map((sub) => (
+                            {isLoading ? (
+                                [1, 2, 3].map(i => (
+                                    <tr key={i}>
+                                        <td colSpan={5} className="px-6 py-4"><Skeleton className="h-8 w-full" /></td>
+                                    </tr>
+                                ))
+                            ) : submissions.length > 0 ? (
+                                submissions.map((sub) => (
                                     <tr key={sub.id} className="hover:bg-white/5 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center">
@@ -133,7 +158,7 @@ export default function InstructorQuizSubmissionsPage() {
                             ) : (
                                 <tr>
                                     <td colSpan={5} className="py-20 text-center text-slate-500">
-                                        No submissions found matching your search.
+                                        No submissions found{search ? ` matching "${search}"` : ""}.
                                     </td>
                                 </tr>
                             )}
@@ -141,6 +166,12 @@ export default function InstructorQuizSubmissionsPage() {
                     </table>
                 </div>
             </Card>
+
+            <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+            />
         </div>
     );
 }

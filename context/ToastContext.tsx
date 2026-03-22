@@ -68,12 +68,40 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                                 {t.type === "loading" && <Loader2 className="h-5 w-5 animate-spin" />}
                             </div>
                             <p className="text-sm font-medium leading-tight">{t.message}</p>
-                            <button
-                                onClick={() => removeToast(t.id)}
-                                className="ml-auto p-1 rounded-full hover:bg-white/10 transition-colors"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
+                            <div className="relative flex items-center justify-center h-7 w-7 ml-auto shrink-0 group">
+                                {t.type !== 'loading' && (
+                                    <svg className="absolute -rotate-90 h-7 w-7 pointer-events-none">
+                                        <circle
+                                            cx="14"
+                                            cy="14"
+                                            r="12"
+                                            fill="transparent"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeDasharray="75.4"
+                                            className="opacity-10"
+                                        />
+                                        <motion.circle
+                                            cx="14"
+                                            cy="14"
+                                            r="12"
+                                            fill="transparent"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeDasharray="75.4"
+                                            initial={{ strokeDashoffset: 0 }}
+                                            animate={{ strokeDashoffset: 75.4 }}
+                                            transition={{ duration: 5, ease: "linear" }}
+                                        />
+                                    </svg>
+                                )}
+                                <button
+                                    onClick={() => removeToast(t.id)}
+                                    className="relative z-10 p-1 rounded-full hover:bg-white/10 transition-colors pointer-events-auto"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
                         </motion.div>
                     ))}
                 </AnimatePresence>

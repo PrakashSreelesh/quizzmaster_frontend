@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { QuestionEditor } from "@/components/instructor/QuestionEditor";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { Trash2, Edit, Plus, Save, Eye, EyeOff, Loader2, GripVertical, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, Edit, Plus, Save, Eye, EyeOff, Loader2, GripVertical, AlertCircle, ChevronDown, ChevronUp, HelpCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 import Link from "next/link";
@@ -24,8 +24,8 @@ export default function EditQuizPage() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [editingQuestionId, setEditingQuestionId] = useState<number | 'new' | null>(null);
-    const [expandedQuestionId, setExpandedQuestionId] = useState<number | null>(null);
+    const [editingQuestionId, setEditingQuestionId] = useState<string | 'new' | null>(null);
+    const [expandedQuestionId, setExpandedQuestionId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -74,7 +74,7 @@ export default function EditQuizPage() {
                 setQuestions([...questions, res.data]);
             } else {
                 const res = await api.put(`/quizzes/${id}/questions/${editingQuestionId}`, qData);
-                setQuestions(questions.map(q => q.id === editingQuestionId ? res.data : q));
+                setQuestions(questions.map(q => (q.id as unknown as string) === editingQuestionId ? res.data : q));
             }
             setEditingQuestionId(null);
             toastSuccess("Question saved.");
@@ -87,11 +87,11 @@ export default function EditQuizPage() {
         }
     };
 
-    const handleDeleteQuestion = async (qId: number) => {
+    const handleDeleteQuestion = async (qId: string) => {
         if (!confirm("Are you sure?")) return;
         try {
             await api.delete(`/quizzes/${id}/questions/${qId}`);
-            setQuestions(questions.filter(q => q.id !== qId));
+            setQuestions(questions.filter(q => (q.id as unknown as string) !== qId));
             toastSuccess("Question deleted.");
         } catch (err: any) {
             if (err.response?.status !== 401) {
@@ -128,7 +128,13 @@ export default function EditQuizPage() {
                             "border-slate-800",
                             quiz.is_published ? "text-green-400 hover:text-green-300" : "text-slate-400"
                         )}
-                        onClick={() => handleUpdateQuiz({ is_published: !quiz.is_published })}
+                        onClick={() => {
+                            if (!quiz.is_published && questions.length === 0) {
+                                toastError("Cannot publish a quiz with no questions.");
+                                return;
+                            }
+                            handleUpdateQuiz({ is_published: !quiz.is_published });
+                        }}
                         disabled={isSaving}
                     >
                         {quiz.is_published ? (
@@ -240,19 +246,19 @@ export default function EditQuizPage() {
                                                 <p className="text-white text-sm font-medium line-clamp-1">{q.text}</p>
                                             </div>
                                             <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-white" onClick={() => setEditingQuestionId(q.id)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-white" onClick={() => setEditingQuestionId(q.id as unknown as string)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-400" onClick={() => handleDeleteQuestion(q.id)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-400" onClick={() => handleDeleteQuestion(q.id as unknown as string)}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-white" onClick={() => setExpandedQuestionId(expandedQuestionId === q.id ? null : q.id)}>
-                                                    {expandedQuestionId === q.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-white" onClick={() => setExpandedQuestionId(expandedQuestionId === (q.id as unknown as string) ? null : (q.id as unknown as string))}>
+                                                    {expandedQuestionId === (q.id as unknown as string) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                                 </Button>
                                             </div>
                                         </div>
 
-                                        {expandedQuestionId === q.id && (
+                                        {expandedQuestionId === (q.id as unknown as string) && (
                                             <CardContent className="bg-slate-950/30 pt-4 pb-6 px-12 animate-in slide-in-from-top-2 duration-300">
                                                 <div className="space-y-2">
                                                     <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">Options</span>
@@ -283,8 +289,4 @@ export default function EditQuizPage() {
             </div>
         </div>
     );
-}
-
-function Link({ href, children, ...props }: any) {
-    return <a href={href} {...props}>{children}</a>;
 }

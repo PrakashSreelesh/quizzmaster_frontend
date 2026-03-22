@@ -20,20 +20,25 @@ export default function QuizTakePage() {
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [answers, setAnswers] = useState<Record<number, string>>({});
+    const [answers, setAnswers] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [isTimerStarted, setIsTimerStarted] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await api.get(`/quizzes/published/${id}`);
-                setQuiz(response.data);
-                setQuestions(response.data.questions || []);
+                // Request with shuffle=true for question randomization
+                const response = await api.get(`/quizzes/published/${id}?shuffle=true`);
+                // Interceptor unwraps to response.data.data
+                const data = response.data;
+                setQuiz(data);
+                setQuestions(data.questions || []);
 
-                if (response.data.time_limit_minutes) {
-                    setTimeLeft(response.data.time_limit_minutes * 60);
+                if (data.time_limit_minutes && !isTimerStarted) {
+                    setTimeLeft(data.time_limit_minutes * 60);
+                    setIsTimerStarted(true);
                 }
             } catch (err: any) {
                 console.error("Failed to load quiz content", err);
@@ -45,47 +50,58 @@ export default function QuizTakePage() {
             }
         };
         fetchData();
-    }, [id, toastError]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]); // Only load once when ID changes
 
     const handleSubmit = useCallback(async () => {
         if (isSubmitting) return;
         setIsSubmitting(true);
 
         try {
-            const formattedAnswers = Object.entries(answers).map(([qId, val]) => ({
-                question_id: parseInt(qId),
-                answer_value: val,
+            // Include ALL questions in submission (for unattended status)
+            const formattedAnswers = questions.map(q => ({
+                question_id: q.id,
+                answer_value: answers[q.id] || null, // null = unattended
             }));
 
             const response = await api.post(`/submissions/quiz/${id}`, {
                 answers: formattedAnswers,
             });
 
-            router.push(`/submissions/${response.data.id}`);
+            // The interceptor unwraps the response.data to the inner data object
+            // So response.data should be the submission object itself.
+            if (response.data && response.data.id) {
+                router.push(`/submissions/${response.data.id}`);
+            } else {
+                throw new Error("Invalid response from server");
+            }
         } catch (err: any) {
             console.error("Submission failed", err);
-            if (err.response?.status !== 401) {
-                toastError(err.response?.data?.detail || "Submission failed. Please try again.");
-            }
+            const msg = err.response?.data?.detail || err.message || "Submission failed. Please try again.";
+            toastError(msg);
             setIsSubmitting(false);
         }
-    }, [id, answers, isSubmitting, router, toastError]);
+    }, [id, questions, answers, isSubmitting, router, toastError]);
 
     // Timer logic
     useEffect(() => {
-        if (timeLeft === null || timeLeft <= 0) {
-            if (timeLeft === 0) handleSubmit();
+        if (timeLeft === null || timeLeft < 0 || isSubmitting) {
+            return;
+        }
+
+        if (timeLeft === 0) {
+            handleSubmit();
             return;
         }
 
         const timer = setInterval(() => {
-            setTimeLeft(prev => (prev !== null ? prev - 1 : null));
+            setTimeLeft(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [timeLeft, handleSubmit]);
+    }, [timeLeft, handleSubmit, isSubmitting]);
 
-    const setAnswer = (questionId: number, value: string) => {
+    const setAnswer = (questionId: string, value: string) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }));
     };
 
@@ -257,6 +273,3 @@ export default function QuizTakePage() {
     );
 }
 
-function Link({ href, children, ...props }: any) {
-    return <a href={href} {...props}>{children}</a>;
-}
