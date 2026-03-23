@@ -3,7 +3,7 @@
 import { Quiz } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Edit, BarChart3, Users, ExternalLink, Trash2, Eye, EyeOff } from "lucide-react";
+import { Edit, BarChart3, Users, Trash2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 

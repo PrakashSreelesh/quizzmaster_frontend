@@ -307,7 +307,7 @@ export default function EditQuizPage() {
                                 )}>
                                     {editingQuestionId === question.id ? (
                                         <QuestionEditor
-                                            initialData={question}
+                                            question={question}
                                             onSave={handleSaveQuestion}
                                             onCancel={() => setEditingQuestionId(null)}
                                             isSaving={isSaving}

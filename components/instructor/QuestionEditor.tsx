@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
-import { Plus, Trash2, CheckCircle2, Circle, HelpCircle, X, Save, Type, CheckSquare, Hash, Loader2 } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, X, Save, Type, CheckSquare, Hash } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 import { cn } from "@/lib/utils";
 import { Question, Option } from "@/lib/types";
