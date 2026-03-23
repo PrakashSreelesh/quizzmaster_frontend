@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { Quiz, Question } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Clock, BookOpen, User, Play, AlertCircle, Info } from "lucide-react";
+import Link from "next/link";
 
 export default function QuizDetailPage() {
     const { id } = useParams();
@@ -97,28 +99,50 @@ export default function QuizDetailPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="text-sm text-slate-400 space-y-3">
-                            <p>• You have one attempt for this quiz.</p>
+                            <p className="flex justify-between items-center text-slate-300 font-medium pb-2 border-b border-white/5">
+                                <span>Total Attempts Allowed</span>
+                                <span className="text-white">{quiz.max_attempts}</span>
+                            </p>
+                            <p className="flex justify-between items-center text-slate-300 font-medium pb-4 border-b border-white/5">
+                                <span>Attempts Used</span>
+                                <span className={cn(
+                                    "font-bold",
+                                    (quiz.user_attempts || 0) >= quiz.max_attempts ? "text-red-400" : "text-emerald-400"
+                                )}>
+                                    {quiz.user_attempts || 0} / {quiz.max_attempts}
+                                </span>
+                            </p>
+
+                            {(quiz.user_attempts || 0) >= quiz.max_attempts && (
+                                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 flex items-start space-x-2">
+                                    <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                    <span>You have reached the maximum number of attempts for this quiz.</span>
+                                </div>
+                            )}
+
                             <p>• Make sure you have a stable internet connection.</p>
                             {quiz.time_limit_minutes && (
                                 <p>• Timer starts as soon as you click the button below.</p>
                             )}
-                            <p>• Good luck!</p>
+                            <p>• Points are awarded for each correct answer.</p>
                         </CardContent>
                         <CardFooter>
-                            <Button asChild size="lg" className="w-full">
-                                <Link href={`/quizzes/${id}/take`}>
-                                    Start Now
-                                    <Play className="h-4 w-4 ml-2 fill-current" />
-                                </Link>
-                            </Button>
+                            {(quiz.user_attempts || 0) < quiz.max_attempts ? (
+                                <Button asChild size="lg" className="w-full bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20">
+                                    <Link href={`/quizzes/${id}/take`}>
+                                        Start Now
+                                        <Play className="h-4 w-4 ml-2 fill-current" />
+                                    </Link>
+                                </Button>
+                            ) : (
+                                <Button disabled size="lg" className="w-full bg-slate-800 text-slate-500 border-slate-700">
+                                    Limit Reached
+                                </Button>
+                            )}
                         </CardFooter>
                     </Card>
                 </div>
             </div>
         </div>
     );
-}
-
-function Link({ href, children, ...props }: any) {
-    return <a href={href} {...props}>{children}</a>;
 }

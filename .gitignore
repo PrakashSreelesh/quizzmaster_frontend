@@ -57,4 +57,8 @@ next-env.d.ts
 !.vscode/extensions.json
 !.vscode/settings.json
 !.vscode/launch.json
-.idea/
+# .idea/
+
+# # AI rules
+# AGENTS.md
+# CLAUDE.md

@@ -13,14 +13,14 @@ import { cn } from "@/lib/utils";
 interface QuizAnalytics {
     total_submissions: number;
     average_score: number;
-    max_possible_score: number;
+    max_score: number;
     pass_rate: number;
     question_stats: {
-        question_id: number;
-        text: string;
-        correct_count: number;
-        total_attempts: number;
-        accuracy: number;
+        question_id: string;
+        question_text: string;
+        correct_answers: number;
+        total_answers: number;
+        correct_rate: number;
     }[];
 }
 
@@ -73,7 +73,7 @@ export default function InstructorQuizAnalyticsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
                 <StatItem icon={<Users className="text-blue-400" />} label="Submissions" value={analytics.total_submissions.toString()} />
-                <StatItem icon={<Target className="text-violet-400" />} label="Avg. Score" value={`${analytics.average_score.toFixed(1)}/${analytics.max_possible_score}`} />
+                <StatItem icon={<Target className="text-violet-400" />} label="Avg. Score" value={`${analytics.average_score.toFixed(1)}/${analytics.max_score}`} />
                 <StatItem icon={<TrendingUp className="text-green-400" />} label="Pass Rate" value={`${analytics.pass_rate.toFixed(1)}%`} />
                 <StatItem icon={<CheckCircle2 className="text-indigo-400" />} label="Completion" value={analytics.total_submissions > 0 ? "High" : "N/A"} />
             </div>
@@ -91,21 +91,21 @@ export default function InstructorQuizAnalyticsPage() {
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                     <div className="flex-grow max-w-2xl">
                                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Question {idx + 1}</span>
-                                        <p className="text-white font-medium">{q.text}</p>
+                                        <p className="text-white font-medium">{q.question_text}</p>
                                     </div>
 
                                     <div className="flex items-center space-x-10">
                                         <div className="text-center w-24">
-                                            <span className="block text-xl font-bold text-white">{q.accuracy.toFixed(0)}%</span>
+                                            <span className="block text-xl font-bold text-white">{(q.correct_rate || 0).toFixed(0)}%</span>
                                             <span className="block text-[10px] text-slate-500 uppercase font-bold tracking-widest">Accuracy</span>
                                         </div>
                                         <div className="w-32 h-2 bg-slate-800 rounded-full overflow-hidden shrink-0">
                                             <div
                                                 className={cn(
                                                     "h-full transition-all duration-1000 ease-out",
-                                                    q.accuracy > 70 ? "bg-green-500" : q.accuracy > 40 ? "bg-yellow-500" : "bg-red-500"
+                                                    q.correct_rate > 70 ? "bg-green-500" : q.correct_rate > 40 ? "bg-yellow-500" : "bg-red-500"
                                                 )}
-                                                style={{ width: `${q.accuracy}%` }}
+                                                style={{ width: `${q.correct_rate}%` }}
                                             />
                                         </div>
                                     </div>

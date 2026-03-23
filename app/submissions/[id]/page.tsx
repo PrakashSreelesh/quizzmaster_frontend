@@ -12,9 +12,10 @@ import { cn } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { useToast } from "@/context/ToastContext";
 import { Skeleton } from "@/components/ui/Skeleton";
+import Link from "next/link";
 
 interface GradedAnswer {
-    question_id: number;
+    question_id: string;
     answer_value: string;
     is_correct: boolean;
     points_awarded: number;
@@ -175,6 +176,3 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode, label: string
     );
 }
 
-function Link({ href, children, ...props }: any) {
-    return <a href={href} {...props}>{children}</a>;
-}

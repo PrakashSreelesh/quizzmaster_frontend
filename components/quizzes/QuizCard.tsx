@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Quiz } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Clock, BookOpen, User, Play } from "lucide-react";
+import { Clock, BookOpen, User, Play, Tag } from "lucide-react";
 
 interface QuizCardProps {
     quiz: Quiz;
@@ -23,6 +24,16 @@ export function QuizCard({ quiz }: QuizCardProps) {
                         </div>
                     )}
                 </div>
+                {quiz.categories && quiz.categories.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2 mb-3">
+                        {quiz.categories.map((cat, i) => (
+                            <div key={i} className="flex items-center text-[10px] font-bold bg-slate-800/80 text-violet-300 px-2 py-0.5 rounded-md border border-violet-500/10 backdrop-blur-sm">
+                                <Tag className="h-2.5 w-2.5 mr-1 text-violet-400" />
+                                {cat}
+                            </div>
+                        ))}
+                    </div>
+                )}
                 <CardTitle className="text-xl group-hover:text-violet-400 transition-colors line-clamp-1">
                     {quiz.title}
                 </CardTitle>
@@ -32,9 +43,20 @@ export function QuizCard({ quiz }: QuizCardProps) {
             </CardHeader>
 
             <CardContent className="flex-grow">
-                <div className="flex items-center text-sm text-slate-400">
-                    <User className="h-4 w-4 mr-2 text-slate-500" />
-                    <span>{quiz.instructor_name || "Guest Instructor"}</span>
+                <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center text-slate-400">
+                        <User className="h-4 w-4 mr-2 text-slate-500" />
+                        <span>{quiz.instructor_name || "Guest Instructor"}</span>
+                    </div>
+                    {quiz.user_attempts !== undefined && (
+                        <div className="text-[11px] font-medium text-slate-500">
+                            Attempts: <span className={cn(
+                                quiz.user_attempts >= quiz.max_attempts ? "text-red-400" : "text-violet-400"
+                            )}>
+                                {quiz.user_attempts}/{quiz.max_attempts}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </CardContent>
 

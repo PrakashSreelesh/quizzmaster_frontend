@@ -31,7 +31,7 @@ export default function LoginPage() {
             });
 
             toastSuccess("Welcome back!");
-            await login(response.data.access_token);
+            await login();
         } catch (err: any) {
             const errorMsg = err.response?.data?.detail || "Invalid username or password";
             toastError(errorMsg);
@@ -59,10 +59,10 @@ export default function LoginPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-300">Username</label>
+                                <label className="text-sm font-medium text-slate-300">Username or Email</label>
                                 <Input
                                     required
-                                    placeholder="Enter your username"
+                                    placeholder="Enter your username or email"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     disabled={isLoading}
@@ -72,7 +72,7 @@ export default function LoginPage() {
                             <div className="space-y-2">
                                 <div className="flex justify-between">
                                     <label className="text-sm font-medium text-slate-300">Password</label>
-                                    <Link href="#" className="text-xs text-violet-400 hover:text-violet-300">Forgot password?</Link>
+                                    <Link href="/auth/forgot-password" title="Forgot Password" className="text-xs text-violet-400 hover:text-violet-300">Forgot password?</Link>
                                 </div>
                                 <Input
                                     required
