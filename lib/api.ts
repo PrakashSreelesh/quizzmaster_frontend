@@ -6,9 +6,14 @@ const api = axios.create({
 });
 
 let isRefreshing = false;
-let failedQueue: any[] = [];
+interface FailedRequest {
+    resolve: (value?: unknown) => void;
+    reject: (reason?: unknown) => void;
+}
 
-const processQueue = (error: any) => {
+let failedQueue: FailedRequest[] = [];
+
+const processQueue = (error: Error | null = null) => {
     failedQueue.forEach(prom => {
         if (error) {
             prom.reject(error);
@@ -67,8 +72,8 @@ api.interceptors.response.use(
                 await api.post('/auth/refresh');
                 processQueue(null);
                 return api(originalRequest);
-            } catch (refreshError) {
-                processQueue(refreshError);
+            } catch (refreshError: unknown) {
+                processQueue(refreshError as Error);
                 // Refresh failed, meaning the session is truly expired
                 if (typeof window !== 'undefined') {
                     // Only redirect if NOT on login page AND NOT on landing page

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { X, Plus, Tag as TagIcon, ChevronDown } from "lucide-react";
+import { X, Tag as TagIcon } from "lucide-react";
 import { Input } from "./Input";
 import { cn } from "@/lib/utils";
 import { Category } from "@/lib/types";

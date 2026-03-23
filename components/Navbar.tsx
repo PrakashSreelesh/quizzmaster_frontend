@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
-import { Brain, LayoutDashboard, LogOut, User as UserIcon, LogIn, ClipboardList } from "lucide-react";
+import { Brain, LayoutDashboard, LogOut, ClipboardList } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 

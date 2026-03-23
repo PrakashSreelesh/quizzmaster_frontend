@@ -3,7 +3,7 @@ import { Quiz } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Clock, BookOpen, User, Play, Tag } from "lucide-react";
+import { Clock, User, Play, Tag } from "lucide-react";
 
 interface QuizCardProps {
     quiz: Quiz;
