@@ -53,6 +53,22 @@ export default function QuizTakePage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]); // Only load once when ID changes
 
+    const [location, setLocation] = useState<string | null>(null);
+
+    // Get geolocation on mount
+    useEffect(() => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocation(`${position.coords.latitude}, ${position.coords.longitude}`);
+                },
+                (error) => {
+                    console.warn("Geolocation access denied or failed", error);
+                }
+            );
+        }
+    }, []);
+
     const handleSubmit = useCallback(async () => {
         if (isSubmitting) return;
         setIsSubmitting(true);
@@ -66,10 +82,10 @@ export default function QuizTakePage() {
 
             const response = await api.post(`/submissions/quiz/${id}`, {
                 answers: formattedAnswers,
+                location: location // Send captured location
             });
 
             // The interceptor unwraps the response.data to the inner data object
-            // So response.data should be the submission object itself.
             if (response.data && response.data.id) {
                 router.push(`/submissions/${response.data.id}`);
             } else {
@@ -81,25 +97,29 @@ export default function QuizTakePage() {
             toastError(msg);
             setIsSubmitting(false);
         }
-    }, [id, questions, answers, isSubmitting, router, toastError]);
+    }, [id, questions, answers, isSubmitting, router, toastError, location]);
 
-    // Timer logic
+    // Robust Timer logic
     useEffect(() => {
-        if (timeLeft === null || timeLeft < 0 || isSubmitting) {
-            return;
-        }
+        if (timeLeft === null || isSubmitting) return;
 
-        if (timeLeft === 0) {
+        if (timeLeft <= 0) {
             handleSubmit();
             return;
         }
 
         const timer = setInterval(() => {
-            setTimeLeft(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
+            setTimeLeft(prev => {
+                if (prev === null || prev <= 0) {
+                    clearInterval(timer);
+                    return 0;
+                }
+                return prev - 1;
+            });
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [timeLeft, handleSubmit, isSubmitting]);
+    }, [timeLeft === 0, isSubmitting, handleSubmit]); // Only trigger when timeLeft reaches 0 or isSubmitting changes
 
     const setAnswer = (questionId: string, value: string) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }));

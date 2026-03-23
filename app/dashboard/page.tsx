@@ -49,14 +49,14 @@ export default function InstructorDashboardPage() {
                 params: {
                     search: debouncedSearch || undefined,
                     page,
-                    size: 9 // 3x3 grid looks better
+                    limit: 9 // 3x3 grid looks better
                 }
             });
             // The interceptor unwraps GenericResponse data
-            const { items, meta } = response.data;
+            const { items, pagination } = response.data;
             setQuizzes(items);
-            setTotalPages(meta.pages);
-            setTotalItems(meta.total);
+            setTotalPages(pagination.totalPages);
+            setTotalItems(pagination.total);
         } catch (error: any) {
             console.error("Failed to fetch own quizzes", error);
             if (error.response?.status !== 401) {

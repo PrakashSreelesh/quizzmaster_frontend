@@ -9,7 +9,7 @@ import { LoadingScreen } from '@/components/ui/LoadingScreen';
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
-    login: (token: string) => Promise<void>;
+    login: () => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
     isInstructor: boolean;
@@ -28,43 +28,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             const response = await api.get('/auth/me');
             setUser(response.data);
+            return response.data.role;
         } catch (error) {
-            localStorage.removeItem('access_token');
             setUser(null);
+            return null;
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            fetchUser();
-        } else {
-            setIsLoading(false);
-        }
+        fetchUser();
     }, []);
 
-    const login = async (token: string) => {
-        localStorage.setItem('access_token', token);
-        await fetchUser();
-        router.push('/');
+    const login = async () => {
+        const role = await fetchUser();
+        if (role === 'instructor') {
+            router.push('/dashboard');
+        } else if (role === 'student') {
+            router.push('/analytics');
+        } else {
+            router.push('/');
+        }
     };
 
-    const logout = () => {
-        localStorage.removeItem('access_token');
-        setUser(null);
-        router.push('/auth/login');
+    const logout = async () => {
+        try {
+            await api.post('/auth/logout');
+        } catch (err) {
+            console.error("Logout failed:", err);
+        } finally {
+            setUser(null);
+            router.push('/auth/login');
+        }
     };
 
     // Route guarding (simple client-side check)
     useEffect(() => {
         if (!isLoading) {
             const isAuthPage = pathname?.startsWith('/auth');
-            const token = localStorage.getItem('access_token');
 
-            if (!token && !isAuthPage && pathname !== '/') {
+            if (!user && !isAuthPage && pathname !== '/') {
                 router.push('/auth/login');
+            } else if (user && (isAuthPage || pathname === '/')) {
+                if (user.role === 'instructor') {
+                    router.push('/dashboard');
+                } else if (user.role === 'student') {
+                    router.push('/analytics');
+                }
             }
         }
     }, [pathname, user, isLoading, router]);

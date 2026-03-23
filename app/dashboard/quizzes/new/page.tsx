@@ -1,25 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { Plus, ChevronRight, Loader2, BookOpen, Clock, FileText } from "lucide-react";
+import { Plus, ChevronRight, Loader2, BookOpen, Clock, FileText, Users, Tag } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { ImportModal } from "@/components/instructor/ImportModal";
+import { TagInput } from "@/components/ui/TagInput";
+import { Category } from "@/lib/types";
 
 export default function NewQuizPage() {
     const router = useRouter();
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [timeLimit, setTimeLimit] = useState<number | "">("");
+    const [maxAttempts, setMaxAttempts] = useState<number | "">(1);
+    const [categories, setCategories] = useState<string[]>([]);
+    const [allCategories, setAllCategories] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const { error: toastError } = useToast();
 
     const [showImportModal, setShowImportModal] = useState(false);
+
+    // Fetch existing categories for suggestions
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await api.get("/categories/");
+                // Handle different response formats (backend returns data: Category[])
+                const cats = response.data.data || response.data;
+                setAllCategories(cats.map((c: any) => c.name));
+            } catch (err) {
+                console.error("Failed to fetch categories", err);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,6 +50,8 @@ export default function NewQuizPage() {
                 title,
                 description,
                 time_limit_minutes: timeLimit === "" ? null : timeLimit,
+                max_attempts: maxAttempts === "" ? 1 : maxAttempts,
+                categories,
             });
             router.push(`/dashboard/quizzes/${response.data.id}/edit`);
         } catch (err: any) {
@@ -115,6 +137,38 @@ export default function NewQuizPage() {
                                 className="h-12"
                             />
                             <p className="text-xs text-slate-500 italic">Students will see a countdown during the quiz.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-300 flex items-center">
+                                <Users className="h-4 w-4 mr-2 text-slate-500" />
+                                Max Attempts
+                            </label>
+                            <Input
+                                type="number"
+                                placeholder="1"
+                                value={maxAttempts}
+                                onChange={(e) => setMaxAttempts(e.target.value === "" ? "" : parseInt(e.target.value))}
+                                disabled={isLoading}
+                                min={1}
+                                className="h-12"
+                            />
+                            <p className="text-xs text-slate-500 italic">Total number of times a student can take this quiz.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-300 flex items-center">
+                                <Tag className="h-4 w-4 mr-2 text-slate-500" />
+                                Categories
+                            </label>
+                            <TagInput
+                                tags={categories}
+                                onTagsChange={setCategories}
+                                suggestions={allCategories}
+                                placeholder="e.g. IT, Programming, Python"
+                                disabled={isLoading}
+                            />
+                            <p className="text-xs text-slate-500 italic">Press Enter or use commas to add multiple categories.</p>
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-end pt-6 border-t border-white/5">

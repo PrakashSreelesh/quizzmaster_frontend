@@ -40,15 +40,15 @@ export default function InstructorQuizSubmissionsPage() {
         try {
             const [subRes, quizRes] = await Promise.all([
                 api.get(`/submissions/quiz/${id}`, {
-                    params: { search: debouncedSearch || undefined, page, size: 20 }
+                    params: { search: debouncedSearch || undefined, page, limit: 20 }
                 }),
                 api.get(`/quizzes/${id}`)
             ]);
 
             // Interceptor unwraps data
-            const { items, meta } = subRes.data;
+            const { items, pagination } = subRes.data;
             setSubmissions(items);
-            setTotalPages(meta.pages);
+            setTotalPages(pagination.totalPages);
             setQuiz(quizRes.data);
         } catch (err: any) {
             console.error("Failed to fetch submissions", err);

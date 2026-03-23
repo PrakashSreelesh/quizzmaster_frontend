@@ -100,9 +100,11 @@ export default function StudentAnalyticsPage() {
 
             {/* Recent Activity */}
             <div className="space-y-6">
-                <div className="flex items-center space-x-2 mb-2">
-                    <History className="h-5 w-5 text-slate-400" />
-                    <h2 className="text-2xl font-bold text-white">Recent Activity</h2>
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                        <History className="h-5 w-5 text-slate-400" />
+                        <h2 className="text-2xl font-bold text-white">Recent Submissions</h2>
+                    </div>
                 </div>
 
                 {stats.recent_submissions && stats.recent_submissions.length > 0 ? (
@@ -145,6 +147,17 @@ export default function StudentAnalyticsPage() {
                 ) : (
                     <div className="py-20 text-center bg-slate-900/20 rounded-3xl border border-dashed border-slate-800">
                         <p className="text-slate-500">No submissions found. Start a quiz to see your progress!</p>
+                    </div>
+                )}
+
+                {stats.recent_submissions && stats.recent_submissions.length > 0 && (
+                    <div className="flex justify-center pt-4">
+                        <Button asChild variant="outline" className="border-slate-800 hover:bg-slate-800/50 hover:text-violet-400 transition-all">
+                            <Link href="/submissions">
+                                View all Submissions
+                                <ArrowRight className="h-4 w-4 ml-2" />
+                            </Link>
+                        </Button>
                     </div>
                 )}
             </div>

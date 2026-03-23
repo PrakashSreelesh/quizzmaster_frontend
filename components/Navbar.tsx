@@ -25,7 +25,9 @@ export function Navbar() {
 
                     {/* Links */}
                     <div className="hidden md:flex items-center space-x-1">
-                        <NavLink href="/" active={pathname === "/"}>Home</NavLink>
+                        {!isAuthenticated && (
+                            <NavLink href="/" active={pathname === "/"}>Home</NavLink>
+                        )}
                         <NavLink href="/quizzes/browse" active={pathname?.startsWith("/quizzes/browse")}>Browse</NavLink>
 
                         {isAuthenticated && (

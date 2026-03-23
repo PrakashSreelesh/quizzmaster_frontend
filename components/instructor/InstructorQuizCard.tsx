@@ -65,6 +65,12 @@ export function InstructorQuizCard({ quiz, onDelete, onTogglePublish }: Instruct
                         <span>Avg. Score</span>
                     </div>
                     <div className="text-sm font-bold text-white text-right">{(quiz.average_score || 0).toFixed(1)}%</div>
+
+                    <div className="flex items-center text-sm text-slate-400">
+                        <Users className="h-4 w-4 mr-2 text-slate-500" />
+                        <span>Max Attempts</span>
+                    </div>
+                    <div className="text-sm font-bold text-white text-right">{quiz.max_attempts}</div>
                 </div>
             </CardContent>
 
