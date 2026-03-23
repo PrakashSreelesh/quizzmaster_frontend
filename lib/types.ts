@@ -22,6 +22,7 @@ export interface Quiz {
     average_score?: number;
     instructor_name?: string;
     user_attempts?: number;
+    categories?: string[];
 }
 
 export interface Question {
@@ -58,4 +59,23 @@ export interface Submission {
     browser?: string;
     os?: string;
     location?: string;
+}
+
+export interface SubmissionDetailOut extends Submission {
+    answers: AnswerDetail[];
+}
+
+export interface AnswerDetail {
+    id: string;
+    question_id: string;
+    answer_value: string | null;
+    is_correct: boolean | null;
+    points_awarded: number | null;
+    question_text: string | null;
+    correct_answer: string | null;
+}
+
+export interface Category {
+    id: string;
+    name: string;
 }

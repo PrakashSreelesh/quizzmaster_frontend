@@ -6,6 +6,10 @@ export const getMe = async (): Promise<User> => {
     return response.data;
 };
 
-export const logout = () => {
-    localStorage.removeItem("access_token");
+export const logout = async () => {
+    try {
+        await api.post("/auth/logout");
+    } catch (err) {
+        console.error("Logout failed:", err);
+    }
 };

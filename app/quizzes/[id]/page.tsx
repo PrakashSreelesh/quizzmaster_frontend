@@ -104,12 +104,12 @@ export default function QuizDetailPage() {
                                 <span className="text-white">{quiz.max_attempts}</span>
                             </p>
                             <p className="flex justify-between items-center text-slate-300 font-medium pb-4 border-b border-white/5">
-                                <span>Your Previous Attempts</span>
+                                <span>Attempts Used</span>
                                 <span className={cn(
                                     "font-bold",
                                     (quiz.user_attempts || 0) >= quiz.max_attempts ? "text-red-400" : "text-emerald-400"
                                 )}>
-                                    {quiz.user_attempts || 0}
+                                    {quiz.user_attempts || 0} / {quiz.max_attempts}
                                 </span>
                             </p>
 
