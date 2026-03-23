@@ -80,6 +80,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [pathname, user, isLoading, router]);
 
+    // Determine if we should show the children or a loading state while redirecting
+    const isAuthPage = pathname?.startsWith('/auth');
+    const isPublicPage = isAuthPage || pathname === '/';
+    const shouldShowChildren = !isLoading && (isPublicPage || !!user);
+
     const value = {
         user,
         isLoading,
@@ -92,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <AuthContext.Provider value={value}>
-            {isLoading ? <LoadingScreen /> : children}
+            {shouldShowChildren ? children : <LoadingScreen />}
         </AuthContext.Provider>
     );
 }
